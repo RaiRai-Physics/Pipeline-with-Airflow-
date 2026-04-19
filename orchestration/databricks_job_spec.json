@@ -1,0 +1,80 @@
+{
+  "name": "covid-medallion-pipeline",
+  "max_concurrent_runs": 1,
+  "tasks": [
+    {
+      "task_key": "bronze_ingestion",
+      "notebook_task": {
+        "notebook_path": "YOUR_REPO_NOTEBOOK_BASE_PATH/01_bronze_ingestion",
+        "base_parameters": {
+          "config_path": "configs/dev.yaml"
+        }
+      },
+      "new_cluster": {
+        "spark_version": "15.4.x-scala2.12",
+        "node_type_id": "i3.xlarge",
+        "num_workers": 1
+      }
+    },
+    {
+      "task_key": "silver_transform",
+      "depends_on": [{"task_key": "bronze_ingestion"}],
+      "notebook_task": {
+        "notebook_path": "YOUR_REPO_NOTEBOOK_BASE_PATH/02_silver_transform",
+        "base_parameters": {
+          "config_path": "configs/dev.yaml"
+        }
+      },
+      "new_cluster": {
+        "spark_version": "15.4.x-scala2.12",
+        "node_type_id": "i3.xlarge",
+        "num_workers": 1
+      }
+    },
+    {
+      "task_key": "gold_dimensions",
+      "depends_on": [{"task_key": "silver_transform"}],
+      "notebook_task": {
+        "notebook_path": "YOUR_REPO_NOTEBOOK_BASE_PATH/03_gold_dimensions",
+        "base_parameters": {
+          "config_path": "configs/dev.yaml"
+        }
+      },
+      "new_cluster": {
+        "spark_version": "15.4.x-scala2.12",
+        "node_type_id": "i3.xlarge",
+        "num_workers": 1
+      }
+    },
+    {
+      "task_key": "gold_fact_and_kpi",
+      "depends_on": [{"task_key": "gold_dimensions"}],
+      "notebook_task": {
+        "notebook_path": "YOUR_REPO_NOTEBOOK_BASE_PATH/04_gold_fact_and_kpi",
+        "base_parameters": {
+          "config_path": "configs/dev.yaml"
+        }
+      },
+      "new_cluster": {
+        "spark_version": "15.4.x-scala2.12",
+        "node_type_id": "i3.xlarge",
+        "num_workers": 1
+      }
+    },
+    {
+      "task_key": "publish_to_s3",
+      "depends_on": [{"task_key": "gold_fact_and_kpi"}],
+      "notebook_task": {
+        "notebook_path": "YOUR_REPO_NOTEBOOK_BASE_PATH/05_publish_to_s3",
+        "base_parameters": {
+          "config_path": "configs/dev.yaml"
+        }
+      },
+      "new_cluster": {
+        "spark_version": "15.4.x-scala2.12",
+        "node_type_id": "i3.xlarge",
+        "num_workers": 1
+      }
+    }
+  ]
+}
